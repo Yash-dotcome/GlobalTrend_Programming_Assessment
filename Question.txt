@@ -1,0 +1,770 @@
+Question
+1.import java.util.HashMap;
+
+class Node {
+    int key;
+    int value;
+    Node prev;
+    Node next;
+    
+    public Node(int key, int value) {
+        this.key = key;
+        this.value = value;
+    }
+}
+
+public class LRUCache {
+    private final int capacity;
+    private final HashMap<Integer, Node> cache;
+    private final Node head;
+    private final Node tail;
+
+    public LRUCache(int capacity) {
+        this.capacity = capacity;
+        this.cache = new HashMap<>();
+        this.head = new Node(0, 0);
+        this.tail = new Node(0, 0);
+        head.next = tail;
+        tail.prev = head;
+    }
+
+    public int get(int key) {
+        if (cache.containsKey(key)) {
+            Node node = cache.get(key);
+            remove(node);
+            add(node);
+            return node.value;
+        }
+        return -1;
+    }
+
+    public void put(int key, int value) {
+        if (cache.containsKey(key)) {
+            remove(cache.get(key));
+        }
+        Node newNode = new Node(key, value);
+        add(newNode);
+        cache.put(key, newNode);
+        if (cache.size() > capacity) {
+            Node lru = tail.prev;
+            remove(lru);
+            cache.remove(lru.key);
+        }
+    }
+
+    private void remove(Node node) {
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+    }
+
+    private void add(Node node) {
+        node.next = head.next;
+        node.next.prev = node;
+        node.prev = head;
+        head.next = node;
+    }
+
+    public static void main(String[] args) {
+        LRUCache cache = new LRUCache(2);
+        
+        // Test cases
+        cache.put(1, 1);
+        cache.put(2, 2);
+        System.out.println(cache.get(1)); // returns 1
+        cache.put(3, 3); // evicts key 2
+        System.out.println(cache.get(2)); // returns -1 (not found)
+        cache.put(4, 4); // evicts key 1
+        System.out.println(cache.get(1)); // returns -1 (not found)
+        System.out.println(cache.get(3)); // returns 3
+        System.out.println(cache.get(4)); // returns 4
+    }
+}
+ 
+Question no. 2
+package com.company;
+
+import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.List;
+
+class ConcurrentModificationDemo {
+    public static void main(String[] args) {
+        List<String> list = new ArrayList<>();
+        list.add("one");
+        list.add("two");
+        list.add("three");
+
+        try {
+            Iterator<String> iterator = list.iterator();
+            while (iterator.hasNext()) {
+                String value = iterator.next();
+                if (value.equals("two")) {
+                    // Modifying the list while iterating
+                    list.remove(value);
+                }
+            }
+        } catch (ConcurrentModificationException e) {
+            System.out.println("ConcurrentModificationException caught: " + e);
+        }
+
+        System.out.println("List after modification attempt: " + list);
+    }
+}
+
+Question no.3
+Define the Custom Annotation
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface LogExecutionTime {
+}
+
+Create an Aspect to Handle the Annotation
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+public class LogExecutionTimeAspect {
+
+    @Around("@annotation(LogExecutionTime)")
+    public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+        long start = System.currentTimeMillis();
+        
+        Object proceed = joinPoint.proceed();
+        
+        long executionTime = System.currentTimeMillis() - start;
+        
+        System.out.println(joinPoint.getSignature() + " executed in " + executionTime + "ms");
+        
+        return proceed;
+    }
+}
+Use the Annotation in a Sample Application
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+@SpringBootApplication
+public class DemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+
+    @Bean
+    public CommandLineRunner commandLineRunner(ExampleService exampleService) {
+        return args -> {
+            exampleService.exampleMethod();
+        };
+    }
+}
+
+ExampleService.java
+import org.springframework.stereotype.Service;
+
+@Service
+public class ExampleService {
+
+    @LogExecutionTime
+    public void exampleMethod() throws InterruptedException {
+        // Simulate a method execution time
+        Thread.sleep(1000);
+    }
+}
+
+Add Maven Dependencies
+
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-aop</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.aspectj</groupId>
+        <artifactId>aspectjrt</artifactId>
+        <version>1.9.7</version>
+    </dependency>
+    <dependency>
+        <groupId>org.aspectj</groupId>
+        <artifactId>aspectjweaver</artifactId>
+        <version>1.9.7</version>
+    </dependency>
+</dependencies>
+
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+    </plugins>
+</build>
+
+Run the Application
+
+Run the Spring Boot application, and it should log the execution time of methods annotated with @LogExecutionTime.
+
+question 4
+
+First, define the TreeNode class, which represents the structure of the binary tree.
+
+public class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+
+    TreeNode(int x) {
+        val = x;
+    }
+}
+
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class Codec {
+
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        if (root == null) return "";
+        
+        StringBuilder sb = new StringBuilder();
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        
+        while (!queue.isEmpty()) {
+            TreeNode node = queue.poll();
+            if (node == null) {
+                sb.append("null,");
+            } else {
+                sb.append(node.val).append(",");
+                queue.offer(node.left);
+                queue.offer(node.right);
+            }
+        }
+        
+        // Remove the trailing comma
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
+    }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        if (data == null || data.isEmpty()) return null;
+        
+        String[] nodes = data.split(",");
+        TreeNode root = new TreeNode(Integer.parseInt(nodes[0]));
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        
+        int i = 1;
+        while (!queue.isEmpty()) {
+            TreeNode node = queue.poll();
+            if (!nodes[i].equals("null")) {
+                node.left = new TreeNode(Integer.parseInt(nodes[i]));
+                queue.offer(node.left);
+            }
+            i++;
+            if (!nodes[i].equals("null")) {
+                node.right = new TreeNode(Integer.parseInt(nodes[i]));
+                queue.offer(node.right);
+            }
+            i++;
+        }
+        
+        return root;
+    }
+}
+
+
+public class Main {
+    public static void main(String[] args) {
+        Codec codec = new Codec();
+        TreeNode root = new TreeNode(1);
+        root.left = new TreeNode(2);
+        root.right = new TreeNode(3);
+        root.right.left = new TreeNode(4);
+        root.right.right = new TreeNode(5);
+
+        String serialized = codec.serialize(root);
+        System.out.println("Serialized: " + serialized);
+
+        TreeNode deserializedRoot = codec.deserialize(serialized);
+        System.out.println("Deserialized root value: " + deserializedRoot.val);
+    }
+}
+
+
+question 5
+
+The TrieNode class will contain an array of child nodes and a boolean to indicate if a node marks the end of a word.
+
+class TrieNode {
+    TrieNode[] children;
+    boolean isEndOfWord;
+
+    public TrieNode() {
+        children = new TrieNode[26]; // For 'a' to 'z'
+        isEndOfWord = false;
+    }
+}
+
+The Trie class will contain methods to insert a word, search for a word, and check if any word starts with a given prefix.
+
+public class Trie {
+    private TrieNode root;
+
+    public Trie() {
+        root = new TrieNode();
+    }
+
+    // Inserts a word into the trie.
+    public void insert(String word) {
+        TrieNode node = root;
+        for (char ch : word.toCharArray()) {
+            int index = ch - 'a';
+            if (node.children[index] == null) {
+                node.children[index] = new TrieNode();
+            }
+            node = node.children[index];
+        }
+        node.isEndOfWord = true;
+    }
+
+    // Returns if the word is in the trie.
+    public boolean search(String word) {
+        TrieNode node = searchNode(word);
+        return node != null && node.isEndOfWord;
+    }
+
+    // Returns if there is any word in the trie that starts with the given prefix.
+    public boolean startsWith(String prefix) {
+        return searchNode(prefix) != null;
+    }
+
+    // Helper method to search for a node corresponding to a prefix or word
+    private TrieNode searchNode(String word) {
+        TrieNode node = root;
+        for (char ch : word.toCharArray()) {
+            int index = ch - 'a';
+            if (node.children[index] == null) {
+                return null;
+            }
+            node = node.children[index];
+        }
+        return node;
+    }
+
+    public static void main(String[] args) {
+        Trie trie = new Trie();
+        trie.insert("apple");
+        System.out.println(trie.search("apple"));   // returns true
+        System.out.println(trie.search("app"));     // returns false
+        System.out.println(trie.startsWith("app")); // returns true
+        trie.insert("app");
+        System.out.println(trie.search("app"));     // returns true
+    }
+}
+
+question 6
+
+import java.util.Stack;
+
+public class ValidParentheses {
+    public boolean isValid(String s) {
+        Stack<Character> stack = new Stack<>();
+
+        for (char ch : s.toCharArray()) {
+            if (ch == '(' || ch == '{' || ch == '[') {
+                stack.push(ch);
+            } else {
+                if (stack.isEmpty()) {
+                    return false;
+                }
+                char top = stack.pop();
+                if ((ch == ')' && top != '(') ||
+                    (ch == '}' && top != '{') ||
+                    (ch == ']' && top != '[')) {
+                    return false;
+                }
+            }
+        }
+
+        return stack.isEmpty();
+    }
+
+    public static void main(String[] args) {
+        ValidParentheses validator = new ValidParentheses();
+
+        // Test cases
+        System.out.println(validator.isValid("()"));         // true
+        System.out.println(validator.isValid("()[]{}"));     // true
+        System.out.println(validator.isValid("(]"));         // false
+        System.out.println(validator.isValid("([)]"));       // false
+        System.out.println(validator.isValid("{[]}"));       // true
+        System.out.println(validator.isValid("{[}"));        // false
+    }
+}
+
+
+question 7
+
+public class ContainerWithMostWater {
+    public int maxArea(int[] height) {
+        int maxArea = 0;
+        int left = 0;
+        int right = height.length - 1;
+
+        while (left < right) {
+            // Calculate the area with the current two lines
+            int width = right - left;
+            int minHeight = Math.min(height[left], height[right]);
+            int currentArea = width * minHeight;
+
+            // Update maxArea if the current area is larger
+            maxArea = Math.max(maxArea, currentArea);
+
+            // Move the pointer that points to the shorter line
+            if (height[left] < height[right]) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+
+        return maxArea;
+    }
+
+    public static void main(String[] args) {
+        ContainerWithMostWater solution = new ContainerWithMostWater();
+
+        // Test cases
+        int[] height1 = {1,8,6,2,5,4,8,3,7};
+        System.out.println(solution.maxArea(height1)); // Output: 49
+
+        int[] height2 = {1,1};
+        System.out.println(solution.maxArea(height2)); // Output: 1
+
+        int[] height3 = {4,3,2,1,4};
+        System.out.println(solution.maxArea(height3)); // Output: 16
+
+        int[] height4 = {1,2,1};
+        System.out.println(solution.maxArea(height4)); // Output: 2
+    }
+}
+
+Question 8
+
+import java.util.PriorityQueue;
+
+public class KthLargestElement {
+
+    public int findKthLargest(int[] nums, int k) {
+        // Create a min-heap with a fixed size of k
+        PriorityQueue<Integer> minHeap = new PriorityQueue<>(k);
+
+        // Iterate through the array
+        for (int num : nums) {
+            minHeap.offer(num);
+            // If the size of the heap exceeds k, remove the smallest element
+            if (minHeap.size() > k) {
+                minHeap.poll();
+            }
+        }
+
+        // The root of the heap is the kth largest element
+        return minHeap.peek();
+    }
+
+    public static void main(String[] args) {
+        KthLargestElement solution = new KthLargestElement();
+
+        // Test cases
+        int[] nums1 = {3,2,1,5,6,4};
+        int k1 = 2;
+        System.out.println("The " + k1 + "th largest element is " + solution.findKthLargest(nums1, k1)); // Output: 5
+
+        int[] nums2 = {3,2,3,1,2,4,5,5,6};
+        int k2 = 4;
+        System.out.println("The " + k2 + "th largest element is " + solution.findKthLargest(nums2, k2)); // Output: 4
+    }
+}
+
+
+Question 9
+
+import java.util.ArrayList;
+import java.util.List;
+
+class IntervalTree {
+    private class Interval {
+        int start;
+        int end;
+
+        Interval(int start, int end) {
+            this.start = start;
+            this.end = end;
+        }
+    }
+
+    private class Node {
+        Interval interval;
+        int max;
+        Node left;
+        Node right;
+        int height;
+
+        Node(int start, int end) {
+            this.interval = new Interval(start, end);
+            this.max = end;
+            this.height = 1;
+        }
+    }
+
+    private Node root;
+
+    public void insertInterval(int start, int end) {
+        root = insert(root, start, end);
+    }
+
+    public void deleteInterval(int start, int end) {
+        root = delete(root, start, end);
+    }
+
+    public List<Interval> findOverlappingIntervals(int start, int end) {
+        List<Interval> result = new ArrayList<>();
+        findOverlappingIntervals(root, start, end, result);
+        return result;
+    }
+
+    private Node insert(Node node, int start, int end) {
+        if (node == null) return new Node(start, end);
+
+        if (start < node.interval.start) {
+            node.left = insert(node.left, start, end);
+        } else {
+            node.right = insert(node.right, start, end);
+        }
+
+        node.height = 1 + Math.max(height(node.left), height(node.right));
+        node.max = Math.max(node.max, end);
+
+        return balance(node);
+    }
+
+    private Node delete(Node node, int start, int end) {
+        if (node == null) return null;
+
+        if (start < node.interval.start) {
+            node.left = delete(node.left, start, end);
+        } else if (start > node.interval.start) {
+            node.right = delete(node.right, start, end);
+        } else if (node.interval.end == end) {
+            if (node.left == null || node.right == null) {
+                node = (node.left != null) ? node.left : node.right;
+            } else {
+                Node minNode = getMin(node.right);
+                node.interval = minNode.interval;
+                node.right = delete(node.right, minNode.interval.start, minNode.interval.end);
+            }
+        } else {
+            node.right = delete(node.right, start, end);
+        }
+
+        if (node == null) return null;
+
+        node.height = 1 + Math.max(height(node.left), height(node.right));
+        node.max = Math.max(node.interval.end, Math.max(max(node.left), max(node.right)));
+
+        return balance(node);
+    }
+
+    private void findOverlappingIntervals(Node node, int start, int end, List<Interval> result) {
+        if (node == null) return;
+
+        if (doOverlap(node.interval, new Interval(start, end))) {
+            result.add(node.interval);
+        }
+
+        if (node.left != null && node.left.max >= start) {
+            findOverlappingIntervals(node.left, start, end, result);
+        }
+
+        findOverlappingIntervals(node.right, start, end, result);
+    }
+
+    private boolean doOverlap(Interval i1, Interval i2) {
+        return i1.start <= i2.end && i2.start <= i1.end;
+    }
+
+    private Node balance(Node node) {
+        int balanceFactor = getBalance(node);
+
+        if (balanceFactor > 1) {
+            if (getBalance(node.left) < 0) {
+                node.left = rotateLeft(node.left);
+            }
+            return rotateRight(node);
+        }
+
+        if (balanceFactor < -1) {
+            if (getBalance(node.right) > 0) {
+                node.right = rotateRight(node.right);
+            }
+            return rotateLeft(node);
+        }
+
+        return node;
+    }
+
+    private Node rotateRight(Node y) {
+        Node x = y.left;
+        Node T2 = x.right;
+
+        x.right = y;
+        y.left = T2;
+
+        y.height = Math.max(height(y.left), height(y.right)) + 1;
+        x.height = Math.max(height(x.left), height(x.right)) + 1;
+
+        y.max = Math.max(y.interval.end, Math.max(max(y.left), max(y.right)));
+        x.max = Math.max(x.interval.end, Math.max(max(x.left), max(x.right)));
+
+        return x;
+    }
+
+    private Node rotateLeft(Node x) {
+        Node y = x.right;
+        Node T2 = y.left;
+
+        y.left = x;
+        x.right = T2;
+
+        x.height = Math.max(height(x.left), height(x.right)) + 1;
+        y.height = Math.max(height(y.left), height(y.right)) + 1;
+
+        x.max = Math.max(x.interval.end, Math.max(max(x.left), max(x.right)));
+        y.max = Math.max(y.interval.end, Math.max(max(y.left), max(y.right)));
+
+        return y;
+    }
+
+    private int height(Node node) {
+        return node == null ? 0 : node.height;
+    }
+
+    private int max(Node node) {
+        return node == null ? Integer.MIN_VALUE : node.max;
+    }
+
+    private int getBalance(Node node) {
+        return node == null ? 0 : height(node.left) - height(node.right);
+    }
+
+    private Node getMin(Node node) {
+        while (node.left != null) {
+            node = node.left;
+        }
+        return node;
+    }
+
+    public static void main(String[] args) {
+        IntervalTree tree = new IntervalTree();
+
+        // Insert intervals
+        tree.insertInterval(15, 20);
+        tree.insertInterval(10, 30);
+        tree.insertInterval(17, 19);
+        tree.insertInterval(5, 20);
+        tree.insertInterval(12, 15);
+        tree.insertInterval(30, 40);
+
+        // Find overlapping intervals
+        System.out.println("Overlapping intervals with [14, 16]:");
+        for (Interval interval : tree.findOverlappingIntervals(14, 16)) {
+            System.out.println("[" + interval.start + ", " + interval.end + "]");
+        }
+
+        // Delete interval
+        tree.deleteInterval(10, 30);
+
+        // Find overlapping intervals again
+        System.out.println("Overlapping intervals with [14, 16] after deletion:");
+        for (Interval interval : tree.findOverlappingIntervals(14, 16)) {
+            System.out.println("[" + interval.start + ", " + interval.end + "]");
+        }
+    }
+}
+
+Question 10
+public class PalindromeChecker {
+
+    // Method to check if a given string is a palindrome
+    public boolean isPalindrome(String s) {
+        // Clean the string: remove non-alphanumeric characters and convert to lowercase
+        String cleanedString = cleanString(s);
+
+        // Check if the cleaned string is a palindrome
+        return isPalindromeString(cleanedString);
+    }
+
+    // Method to clean the string: remove non-alphanumeric characters and convert to lowercase
+    private String cleanString(String s) {
+        StringBuilder cleaned = new StringBuilder();
+        for (char ch : s.toCharArray()) {
+            if (Character.isLetterOrDigit(ch)) {
+                cleaned.append(Character.toLowerCase(ch));
+            }
+        }
+        return cleaned.toString();
+    }
+
+    // Method to check if a cleaned string is a palindrome
+    private boolean isPalindromeString(String s) {
+        int left = 0;
+        int right = s.length() - 1;
+
+        while (left < right) {
+            if (s.charAt(left) != s.charAt(right)) {
+                return false;
+            }
+            left++;
+            right--;
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        PalindromeChecker checker = new PalindromeChecker();
+
+        // Test cases
+        String[] testCases = {
+            "A man, a plan, a canal: Panama",
+            "race a car",
+            "No 'x' in Nixon",
+            "Was it a car or a cat I saw?",
+            "12321",
+            "Hello, World!"
+        };
+
+        for (String testCase : testCases) {
+            System.out.println("\"" + testCase + "\" is a palindrome: " + checker.isPalindrome(testCase));
+        }
+    }
+}
+
